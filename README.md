@@ -14,8 +14,9 @@ Everything runs in the browser. No accounts, no server, no data leaves your mach
 
 - **Search-as-you-type** across ~120 popular stocks and ETFs — by ticker (`VOO`, `TSLA`)
   or by name (`Apple`, `Nvidia`). Keyboard-navigable (↑/↓/Enter).
-- **Weight each position** as a percent, then **Normalize to 100%** or **Weight equally**
-  with one click.
+- **Equal distribution by default** — positions you don't type a weight into automatically
+  split the allocation evenly (add 3 → 33.3% each). Type a value to pin a position; the rest
+  re-balance around it. **Normalize to 100%** and **Weight equally** are one-click too.
 - **Live 0–100 diversity score** with a color-coded gauge and rating.
 - **Sub-scores** for position spread, sector spread, and asset-class spread.
 - **Sector-exposure bars** and **contextual tips** ("your largest position is 60% of the

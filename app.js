@@ -109,11 +109,11 @@
   function addHolding(ticker) {
     const s = byTicker[ticker];
     if (!s || holdings.some(h => h.t === ticker)) return;
-    // Default weight: split remaining room, else start at a sensible value.
-    const used = holdings.reduce((a, h) => a + h.pct, 0);
-    const remaining = Math.max(0, 100 - used);
-    const pct = holdings.length === 0 ? 100 : Math.round(remaining > 0 ? remaining : 10);
-    holdings.push(Object.assign({}, s, { pct }));
+    // New positions come in "unset" (touched=false) and are split equally with
+    // every other unset position. The 100 is just the raw default before the
+    // equal-distribution rebalance normalizes it.
+    holdings.push(Object.assign({}, s, { pct: 100, touched: false }));
+    rebalance();
     searchEl.value = "";
     closeSuggestions();
     searchEl.focus();
@@ -123,7 +123,21 @@
   function removeHolding(ticker) {
     const i = holdings.findIndex(h => h.t === ticker);
     if (i >= 0) holdings.splice(i, 1);
+    rebalance();
     render();
+  }
+
+  // Positions the user hasn't typed a value into share the leftover allocation
+  // equally, so an all-default portfolio is always evenly weighted.
+  function rebalance() {
+    const untouched = holdings.filter(h => !h.touched);
+    if (!untouched.length) return;
+    const usedByTouched = holdings
+      .filter(h => h.touched)
+      .reduce((a, h) => a + h.pct, 0);
+    const remaining = Math.max(0, 100 - usedByTouched);
+    const each = round(remaining / untouched.length);
+    untouched.forEach(h => h.pct = each);
   }
 
   function renderHoldings() {
@@ -148,7 +162,20 @@
     holdingsEl.querySelectorAll('input[data-t]').forEach(inp => {
       inp.addEventListener("input", () => {
         const h = holdings.find(x => x.t === inp.dataset.t);
-        if (h) { h.pct = clamp(parseFloat(inp.value) || 0, 0, 100); updateTotals(); score(); }
+        if (!h) return;
+        // A typed value pins this position; the rest re-split what's left.
+        h.touched = true;
+        h.pct = clamp(parseFloat(inp.value) || 0, 0, 100);
+        rebalance();
+        // Reflect rebalanced weights in the other inputs without disturbing the
+        // one being typed into (keeps focus + caret in place).
+        holdingsEl.querySelectorAll('input[data-t]').forEach(other => {
+          if (other === inp) return;
+          const oh = holdings.find(x => x.t === other.dataset.t);
+          if (oh) other.value = oh.pct;
+        });
+        updateTotals();
+        score();
       });
     });
     holdingsEl.querySelectorAll('button[data-del]').forEach(btn => {
@@ -339,8 +366,9 @@
   });
   $("equal").addEventListener("click", () => {
     if (!holdings.length) return;
-    const each = round(100 / holdings.length);
-    holdings.forEach(h => h.pct = each);
+    // Clear all pins and split evenly.
+    holdings.forEach(h => h.touched = false);
+    rebalance();
     render();
   });
   $("clear").addEventListener("click", () => {
