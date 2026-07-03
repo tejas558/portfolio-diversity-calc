@@ -387,6 +387,24 @@
     return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
+  // ================================================================
+  //  Theme toggle (light default, dark optional; persisted)
+  // ================================================================
+  const themeToggle = $("themeToggle");
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") || "light";
+  }
+  function setTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("pdc-theme", t); } catch (e) {}
+    $("themeIcon").textContent = t === "dark" ? "☀️" : "🌙";
+    $("themeLabel").textContent = t === "dark" ? "Light" : "Dark";
+  }
+  themeToggle.addEventListener("click", () => {
+    setTheme(currentTheme() === "dark" ? "light" : "dark");
+  });
+  setTheme(currentTheme()); // sync button label with the pre-paint theme
+
   // Initial paint.
   render();
 })();
