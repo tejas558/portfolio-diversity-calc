@@ -4,8 +4,7 @@ A single-page web app: type in your stocks and ETFs (by ticker or name), set eac
 position's weight, and get an instant **0–100 diversity score** for your portfolio —
 with a sector-exposure breakdown and plain-English tips.
 
-> **🔗 Live demo:** enable GitHub Pages (Settings → Pages → Deploy from branch → `main` / root),
-> then it will be live at `https://tejas558.github.io/portfolio-diversity-calc/`.
+> **🔗 Live demo: https://tejas558.github.io/portfolio-diversity-calc/**
 
 Everything runs in the browser. No accounts, no server, no data leaves your machine.
 
